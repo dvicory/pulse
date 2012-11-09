@@ -2481,13 +2481,16 @@ pulse.Visual = pulse.Node.extend({init:function(params) {
     this.updated = true
   }
   pulse.plugins.invoke(pulse.Visual.PLUGIN_TYPE, pulse.Visual.PLUGIN_UPDATE, pulse.plugin.PluginCallbackTypes.onExit, this, arguments)
-}, draw:function(ctx) {
+}, draw:function(ctx, transform) {
   pulse.plugins.invoke(pulse.Visual.PLUGIN_TYPE, pulse.Visual.PLUGIN_DRAW, pulse.plugin.PluginCallbackTypes.onEnter, this, arguments);
   if(this.canvas.width === 0 || this.canvas.height === 0) {
     return
   }
   ctx.save();
   ctx.globalAlpha = this.alpha / 100;
+  if(typeof transform === "function") {
+    transform(ctx, this)
+  }
   if(this.rotation !== 0) {
     var rotationX = this.positionTopLeft.x + this.size.width * Math.abs(this.scale.x) / 2;
     var rotationY = this.positionTopLeft.y + this.size.height * Math.abs(this.scale.y) / 2;
@@ -2497,13 +2500,7 @@ pulse.Visual = pulse.Node.extend({init:function(params) {
   }
   ctx.scale(this.scale.x, this.scale.y);
   var px = this.positionTopLeft.x / this.scale.x;
-  if(this.scale.x < 1) {
-    px -= this.size.width
-  }
   var py = this.positionTopLeft.y / this.scale.y;
-  if(this.scale.y < 1) {
-    py -= this.size.height
-  }
   if(this.shadowEnabled) {
     ctx.shadowOffsetX = this.shadowOffsetX;
     ctx.shadowOffsetY = this.shadowOffsetY;
@@ -2856,7 +2853,7 @@ pulse.Sprite = pulse.Visual.extend({init:function(params) {
   }
   this._super(elapsed);
   pulse.plugins.invoke(pulse.Sprite.PLUGIN_TYPE, pulse.Sprite.PLUGIN_UPDATE, pulse.plugin.PluginCallbackTypes.onExit, this, arguments)
-}, draw:function(ctx) {
+}, draw:function(ctx, transform) {
   pulse.plugins.invoke(pulse.Sprite.PLUGIN_TYPE, pulse.Sprite.PLUGIN_DRAW, pulse.plugin.PluginCallbackTypes.onEnter, this, arguments);
   if(this.texture.percentLoaded < 100 || this.size.width === 0 || this.size.height === 0) {
     return
@@ -2867,7 +2864,7 @@ pulse.Sprite = pulse.Visual.extend({init:function(params) {
     this._private.context.drawImage(slice, 0, 0, this.size.width, this.size.height);
     this.textureUpdated = false
   }
-  this._super(ctx);
+  this._super(ctx, transform);
   pulse.plugins.invoke(pulse.Sprite.PLUGIN_TYPE, pulse.Sprite.PLUGIN_DRAW, pulse.plugin.PluginCallbackTypes.onExit, this, arguments)
 }, calculateProperties:function() {
   this._super()
